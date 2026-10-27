@@ -55,6 +55,12 @@ def main():
     print("=" * 78)
     print("   WAREHOUSE AMR AUTONOMOUS NAVIGATION — AUTOMATED TEST & VERIFICATION")
     print("=" * 78)
+
+    # Pre-flight cleanup of any stale ROS / Nav2 processes or FastDDS shared memory locks
+    subprocess.run(["pkill", "-9", "-f", "ros2|nav2|amcl|planner_server|controller_server|behavior_server|bt_navigator|map_server|warehouse_simulator"], stderr=subprocess.DEVNULL)
+    subprocess.run(["rm -f /dev/shm/fastrtps_* /dev/shm/sem.fastrtps_*"], shell=True, stderr=subprocess.DEVNULL)
+    time.sleep(1.0)
+
     print("➜ [1/3] Initialisiere Nav2 Humble Stack, AMCL & Warehouse Map...")
 
     env = os.environ.copy()
@@ -77,14 +83,22 @@ def main():
     rclpy.init()
     monitor = WarehouseAMRTestMonitor()
 
-    print("➜ [2/3] Warte auf Nav2 Lifecycle Aktivierung & Telemetrie...")
+    print("➜ [2/3] Warte auf Nav2 Lifecycle Aktivierung & Telemetrie (bis zu 75s)...")
     t0 = time.time()
     connected = False
-    for _ in range(60):
+    last_print = time.time()
+
+    # Wait up to 75 seconds for all 12 Nav2 nodes to activate and enter MISSION_ACTIVE
+    while time.time() - t0 < 75.0:
         rclpy.spin_once(monitor, timeout_sec=0.5)
-        if monitor.telemetry is not None and monitor.telemetry.get("state") != "INITIALIZING":
+        if monitor.telemetry is not None and monitor.telemetry.get("state") == "MISSION_ACTIVE":
             connected = True
             break
+        if time.time() - last_print > 3.0:
+            st = monitor.telemetry.get("state") if monitor.telemetry else "Startup"
+            sub = monitor.telemetry.get("subaction") if monitor.telemetry else "Spawning Nodes"
+            print(f"   [{time.time() - t0:4.1f}s] Nav2 Lifecycle: {st} ({sub})...")
+            last_print = time.time()
 
     if not connected:
         print("✗ Fehler: Timeout beim Verbinden mit Nav2 / Telemetrie!")

@@ -13,27 +13,32 @@ echo "==========================================================================
 echo "    AUTONOMOUS WAREHOUSE AMR (AGV) — INTRA-LOGISTICS NAVIGATION STACK"
 echo "=============================================================================="
 echo " Bitte wähle eine Option:"
-echo " [1] Interaktive Live-Demo (Nav2 Stack + RViz2 GUI + Manuelle Zielvorgabe)"
-echo " [2] Vollautomatischer Flotten-Auftrag (Pick -> Highway -> Shipping -> Charger)"
+echo " [1] Vollautomatischer Flotten-Auftrag + RViz2 GUI (Empfohlen)"
+echo " [2] Manuelle Navigation (Ziel per 2D Nav Goal in RViz2 vorgeben)"
 echo " [3] Automatisierter Regressionstest & Benchmark (Headless)"
 echo " [4] Beenden"
 echo "=============================================================================="
-read -p "Auswahl [1-4] (Standard: 2): " CHOICE
-CHOICE="${CHOICE:-2}"
+read -p "Auswahl [1-4] (Standard: 1): " CHOICE
+CHOICE="${CHOICE:-1}"
+
+# Pre-flight cleanup
+echo "➜ Bereinige alte Prozesse & initialisiere FastDDS..."
+docker exec ros_container bash -c "pkill -9 -f 'ros2|nav2|amcl|planner_server|controller_server|behavior_server|bt_navigator|map_server|warehouse_simulator' 2>/dev/null || true; rm -f /dev/shm/fastrtps_* /dev/shm/sem.fastrtps_* 2>/dev/null || true"
+sleep 0.5
 
 if [ "$CHOICE" == "1" ]; then
-    echo "➜ Starte Nav2 Bringup mit RViz2 Visualization..."
-    docker exec -it ros_container bash -c "\
-      source /opt/ros/humble/setup.bash && \
-      source /root/ros-projects/install/setup.bash && \
-      ros2 launch warehouse_amr_navigation warehouse_amr.launch.py use_rviz:=true auto_mission:=false"
-
-elif [ "$CHOICE" == "2" ]; then
-    echo "➜ Starte autonome Warehouse-Mission mit Telemetrie-Dashboard..."
+    echo "➜ Starte autonome Warehouse-Mission mit RViz2 Visualization & Live-Fahrt..."
     docker exec -it ros_container bash -c "\
       source /opt/ros/humble/setup.bash && \
       source /root/ros-projects/install/setup.bash && \
       ros2 launch warehouse_amr_navigation warehouse_amr.launch.py use_rviz:=true auto_mission:=true"
+
+elif [ "$CHOICE" == "2" ]; then
+    echo "➜ Starte Nav2 Bringup mit RViz2 (Manuelle Zielvorgabe)..."
+    docker exec -it ros_container bash -c "\
+      source /opt/ros/humble/setup.bash && \
+      source /root/ros-projects/install/setup.bash && \
+      ros2 launch warehouse_amr_navigation warehouse_amr.launch.py use_rviz:=true auto_mission:=false"
 
 elif [ "$CHOICE" == "3" ]; then
     echo "➜ Führe automatisierten Nav2 Regressionstest aus..."

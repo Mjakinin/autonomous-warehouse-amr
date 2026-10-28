@@ -57,7 +57,23 @@ def main():
     print("=" * 78)
 
     # Pre-flight cleanup of any stale ROS / Nav2 processes or FastDDS shared memory locks
-    subprocess.run(["pkill", "-9", "-f", "ros2|nav2|amcl|planner_server|controller_server|behavior_server|bt_navigator|map_server|warehouse_simulator"], stderr=subprocess.DEVNULL)
+    try:
+        my_pid = os.getpid()
+        import re
+        target = re.compile(r"warehouse_simulator|rviz2|amcl|planner_server|controller_server|behavior_server|bt_navigator|map_server|lifecycle_manager")
+        for pid_str in os.listdir("/proc"):
+            if pid_str.isdigit():
+                p = int(pid_str)
+                if p not in (1, my_pid):
+                    try:
+                        with open(f"/proc/{p}/cmdline", "rb") as f:
+                            c = f.read().decode("utf-8", "ignore")
+                        if target.search(c) and "test_warehouse_amr" not in c:
+                            os.kill(p, signal.SIGKILL)
+                    except Exception:
+                        pass
+    except Exception:
+        pass
     subprocess.run(["rm -f /dev/shm/fastrtps_* /dev/shm/sem.fastrtps_*"], shell=True, stderr=subprocess.DEVNULL)
     time.sleep(1.0)
 

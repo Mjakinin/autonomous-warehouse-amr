@@ -60,7 +60,7 @@ def main():
     try:
         my_pid = os.getpid()
         import re
-        target = re.compile(r"warehouse_simulator|rviz2|amcl|planner_server|controller_server|behavior_server|bt_navigator|map_server|lifecycle_manager")
+        target = re.compile(r"warehouse_simulator|rviz2|amcl|planner_server|controller_server|behavior_server|bt_navigator|map_server|lifecycle_manager|component_container_isolated|warehouse_amr")
         for pid_str in os.listdir("/proc"):
             if pid_str.isdigit():
                 p = int(pid_str)

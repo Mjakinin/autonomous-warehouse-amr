@@ -21,7 +21,7 @@ import os, signal, re
 my_pid = os.getpid()
 parent_pid = os.getppid()
 ignore = {1, my_pid, parent_pid}
-target = re.compile(r"warehouse_simulator|rviz2|amcl|planner_server|controller_server|behavior_server|bt_navigator|map_server|lifecycle_manager")
+target = re.compile(r"warehouse_simulator|rviz2|amcl|planner_server|controller_server|behavior_server|bt_navigator|map_server|lifecycle_manager|component_container_isolated|warehouse_amr")
 for pid_str in os.listdir("/proc"):
     if pid_str.isdigit():
         pid = int(pid_str)

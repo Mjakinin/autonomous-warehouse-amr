@@ -11,6 +11,15 @@
 
 ---
 
+<p align="center">
+  <img src="docs/media/warehouse_amr_demo.gif" alt="Autonomous Warehouse AMR Nav2 Autonomous Fleet Demo" width="850">
+</p>
+<p align="center">
+  <em>Live-Demonstration: Vollautonome Intralogistik-Mission im 30x20m Fulfillment-Center — 2D-LiDAR SLAM, AMCL-Partikelfilter-Lokalisierung, dynamische Hindernisvermeidung und DWB-Trajektoriensteuerung unter ROS 2 Humble & Nav2.</em>
+</p>
+
+---
+
 ## 📌 Executive Summary
 
 Modern intralogistics and smart fulfillment warehouses (e.g. BMW, Magazino, Jungheinrich, KUKA) rely heavily on **Autonomous Mobile Robots (AMRs / AGVs)** to transport high-payload pallet cargo continuously, safely, and dynamically between high-density storage racks, receiving docks, packing stations, and inductive charging stations.
@@ -189,6 +198,15 @@ docker exec -it ros_container bash -c "\
   python3 /root/ros-projects/src/warehouse_amr_navigation/tools/test_warehouse_amr.py"
 ```
 
+### Option 3: Automatisierter HD Demo Video- & GIF-Recorder
+Erstellt vollautomatisch eine Xvfb-basierte HD-Aufzeichnung inklusive MP4- und GIF-Generierung:
+```bash
+docker exec -it ros_container bash -c "\
+  source /opt/ros/humble/setup.bash && \
+  source /root/ros-projects/install/setup.bash && \
+  python3 /root/ros-projects/src/warehouse_amr_navigation/tools/record_demo_video.py"
+```
+
 **Verifiziertes Testergebnis:**
 ```text
 ==============================================================================
@@ -221,6 +239,10 @@ warehouse_amr_navigation/
 ├── CMakeLists.txt / setup.py       # Ament Python Build Konfiguration
 ├── package.xml                     # ROS 2 Humble Abhängigkeiten
 ├── README.md                       # Projektdokumentation & Interview Deep-Dive
+├── docs/
+│   └── media/
+│       ├── warehouse_amr_demo.mp4  # HD Web MP4 (H.264, FastStart)
+│       └── warehouse_amr_demo.gif  # Animierte Vorschau für GitHub
 ├── config/
 │   └── nav2_params.yaml            # DWB Planner, AMCL, Costmaps & Lifecycle Konfiguration
 ├── launch/
@@ -232,7 +254,8 @@ warehouse_amr_navigation/
 │   └── warehouse_amr.rviz          # Nav2 Visualisierung (Laser, Costmaps, Footprint, Path)
 ├── tools/
 │   ├── start_demo.sh               # Interaktiver Launcher mit RViz2 Integration
-│   └── test_warehouse_amr.py       # Automatisierte End-to-End Test- und Benchmark-Suite
+│   ├── test_warehouse_amr.py       # Automatisierte End-to-End Test- und Benchmark-Suite
+│   └── record_demo_video.py        # Automatisierter Headless Video- & GIF-Recorder (Xvfb)
 └── warehouse_amr_navigation/
     ├── __init__.py
     ├── warehouse_simulator_node.py # 50Hz AMR Kinematik, 2D LiDAR Raycaster, Dyn. Hindernis

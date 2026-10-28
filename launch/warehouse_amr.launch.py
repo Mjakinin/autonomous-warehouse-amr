@@ -26,10 +26,14 @@ def generate_launch_description():
     declare_dynamic_obs = DeclareLaunchArgument(
         'dynamic_obstacle', default_value='true', description='Enable crossing dynamic obstacle'
     )
+    declare_use_composition = DeclareLaunchArgument(
+        'use_composition', default_value='True', description='Whether to use composed Nav2 bringup'
+    )
 
     use_rviz = LaunchConfiguration('use_rviz')
     auto_mission = LaunchConfiguration('auto_mission')
     dynamic_obstacle = LaunchConfiguration('dynamic_obstacle')
+    use_composition = LaunchConfiguration('use_composition')
 
     # 1. High-Fidelity Warehouse Simulation Node
     sim_node = Node(
@@ -55,7 +59,7 @@ def generate_launch_description():
             'params_file': params_file,
             'use_sim_time': 'false',
             'autostart': 'true',
-            'use_composition': 'False',
+            'use_composition': use_composition,
         }.items()
     )
 
@@ -82,6 +86,7 @@ def generate_launch_description():
         declare_use_rviz,
         declare_auto_mission,
         declare_dynamic_obs,
+        declare_use_composition,
         sim_node,
         nav2_bringup,
         mission_node,
